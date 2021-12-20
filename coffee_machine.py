@@ -20,7 +20,7 @@ msg_[17] = "No, I can make only {} cups of coffee"
 msg_[18] = "Write how many disposable coffee cups you want to add:"
 msg_[19] = "The coffee machine has:"
 msg_[20] = "Write action ({}):"
-msg_[21] = "What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back:"
+msg_[21] = "What do you want to buy? {}, back - to main menu:"
 msg_[22] = "disposable cups"
 msg_[23] = "money"
 msg_[24] = "I gave you ${}"
@@ -34,6 +34,7 @@ recept["espresso"] = {'water':250, "milk":0, "beans":16, "money":4}
 recept["latte"] = {'water':350, "milk":75, "beans":20, "money":7}
 recept["cappuccino"] = {'water':200, "milk":100, "beans":12, "money":6}
 
+# has = {'water':0, "milk":0, "beans":120, "cups":0, "money":550}
 has = {'water':400, "milk":540, "beans":120, "cups":9, "money":550}
 qua = {'water':msg_[12], "milk":msg_[13], "beans":msg_[14],
        "cups":msg_[18]}
@@ -44,9 +45,6 @@ can = {'water':0, "milk":0, "beans":0, "cups":0}
 def cup_can(x):
     for i in recept[x]:
         can[i] = (has[i] - recept[x][i]) > 0
-        # can[i] = int(has[i] / recept[x][i])
-    # can["cups"] = has["cups"] - 1 if has["cups"] else 0
-    # return min(can.values())
     can["cups"] = has["cups"] - 1 > 0
     return all(can.values())
 
@@ -67,7 +65,8 @@ def input_action(m, c):
     return a
 
 def buy():
-    c = input_action(msg_[21], ['1', '2', '3', "back"])
+    t = ", ".join([str(k + 1) + " - " + v for k,v in enumerate(recept.keys())])
+    c = input_action(msg_[21].format(t), ['1', '2', '3', "back"])
     if c == "back": return
     c = int(c) - 1
     r = ('espresso', 'latte', 'cappuccino')[c]
@@ -77,11 +76,8 @@ def buy():
         has["money"] += recept[r]["money"] * 2
         has["cups"] -= 1
         print(msg_[15])
-    # elif cups == cup_max:
-        # print(msg_[15].format(cups))
     else:
         print(msg_[25].format(", ".join([k for k,v in can.items() if not v])))
-        # print(msg_[15], msg_[16].format(cup_max - cups))
 
 def print_has():
     print(msg_[19])
@@ -92,6 +88,16 @@ def stop():
     global go
     go = False
 
+def main():
+    u = input_action(msg_[20], action.keys())
+    if u == 'exit':
+        global go
+        go = False
+        return
+    print()
+    action[u]()
+    print()
+
 action = {}
 action['buy'] = buy
 action['fill'] = fill
@@ -99,31 +105,6 @@ action['take'] = take
 action['remaining'] = print_has
 action['exit'] = stop
 
-def main():
-    u = input_action(msg_[20], action.keys())
-    print()
-    action[u]()
-    print()
-"""    if u == 'buy':
-        print()
-        buy()
-        print()
-    elif u == 'fill':
-        print()
-        fill()
-        print()
-    elif u == 'take':
-        print()
-        take()
-        print()
-    elif u == 'remaining':
-        print()
-        print_has()
-        print()
-    elif u == 'exit':
-        # global go
-        go = False
-"""
 
 go = True
 while go:
